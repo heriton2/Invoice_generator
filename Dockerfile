@@ -5,7 +5,7 @@ FROM adoptopenjdk:11-jdk-hotspot
 WORKDIR /app
 
 # Copiar o arquivo JAR da aplicação para o container
-COPY target/invoice_generator.jar app.jar
+COPY target/Invoice_generator-0.0.1-SNAPSHOT.jar app.jar
 
 # Porta exposta pela aplicação
 EXPOSE 8080
