@@ -78,8 +78,7 @@ public class CSVImporter {
                 }
             } catch (IOException | InvalidParameterException e) {
                 String errorMessage = "Erro ao importar o arquivo: " + e.getMessage();
-                String errorCode = "import_error";
-                throw new ImportException(errorMessage, errorCode, e);
+                throw new ImportException(errorMessage);
             }
         }
 
