@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.challenge</groupId>
-    <artifactId>Invoice_generator</artifactId>
+    <artifactId>invoice_generator</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>Invoice_generator</name>
-    <description>Invoice_generator</description>
+    <name>invoice_generator</name>
+    <description>invoice_generator</description>
     <properties>
         <java.version>17</java.version>
     </properties>
