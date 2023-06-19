@@ -33,7 +33,9 @@ public class CSVImporter {
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     private static final String INVALID_CNPJ_ERROR_MESSAGE = "Número CNPJ inválido. Cobrança não gerada.";
 
-    public void importData(MultipartFile file) throws ImportException {
+    public int importData(MultipartFile file) throws ImportException {
+
+        int registerCount = 0;
 
         try {
             CSVParser parser = CSVParser.parse(file.getInputStream(), Charset.defaultCharset(), CSVFormat.DEFAULT.withDelimiter(',').withFirstRecordAsHeader());
@@ -68,12 +70,16 @@ public class CSVImporter {
                 item.setDueDate(dueDate);
 
                 importedItemRepository.save(item);
+
+                registerCount ++;
             }
         } catch (IOException | InvalidParameterException e) {
             String errorMessage = "Erro ao importar o arquivo: " + e.getMessage();
             String errorCode = "import_error";
             throw new ImportException(errorMessage, errorCode, e);
         }
+
+        return registerCount;
     }
 
     public List<ImportedItem> getAllImportedItems() {

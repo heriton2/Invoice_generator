@@ -27,8 +27,8 @@ public class ImportController {
     @PostMapping(value ="/import", produces = "application/json")
     public ResponseEntity<Object> importData(@RequestParam("file") MultipartFile file) {
         try {
-            csvImporter.importData(file);
-            return ResponseEntity.status(HttpStatus.CREATED).body(null);
+            int registerCount = csvImporter.importData(file);
+            return ResponseEntity.status(HttpStatus.CREATED).body(registerCount);
         } catch (ImportException e) {
             ErrorResponseDto errorResponse = new ErrorResponseDto(e.getErrorCode(), e.getMessage(), e.getCause().toString());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
