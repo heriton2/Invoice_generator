@@ -41,8 +41,6 @@ public class InvoiceItem {
     @Column
     private String dueDate;
     @Column
-    private Double totalValue;
-    @Column
     private Double totalValueToPay;
 }
 

@@ -1,58 +1,61 @@
 package com.challenge.invoice_generator.utils;
 
+import com.challenge.invoice_generator.exception.InvalidFileException;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+
 public class FileValidator {
-    public boolean validateColumns(MultipartFile file) {
-        try {
-            CSVParser parser = CSVParser.parse(file.getInputStream(), Charset.defaultCharset(), CSVFormat.DEFAULT);
-            CSVRecord header = null;
-            for (CSVRecord rec : parser) {
-                header = rec;
+
+    private static final Set<String> EXPECTED_COLUMNS = new HashSet<>(Arrays.asList(
+            "CNPJ\n (apenas os números)",
+            "NOME FANTASIA",
+            "NRO DE DIAS UTEIS PARA VECTO DA FATURA",
+            "EMAIL COBRANÇA",
+            "QTDE MENSALIDADE",
+            "VALOR MENSALIDADE",
+            "VALOR  UNITARIO EMISSAO CARTÃO",
+            "QTDE CARTAO EMITIDOS"
+    ));
+
+    public static boolean validateColumns(MultipartFile file) throws InvalidFileException {
+        try (CSVParser parser = CSVParser.parse(file.getInputStream(), StandardCharsets.UTF_8, CSVFormat.DEFAULT)) {
+            Iterator<CSVRecord> recordsIterator = parser.iterator();
+            if (!recordsIterator.hasNext()) {
+                return false; // Arquivo vazio
             }
 
+            CSVRecord header = recordsIterator.next();
             if (header == null) {
                 return false; // Estrutura de colunas divergente
             }
 
-            String[] expectedColumns = {
-                    "CNPJ (apenas os números)",
-                    "NOME FANTASIA",
-                    "NRO DE DIAS UTEIS PARA VECTO DA FATURA",
-                    "EMAIL COBRANÇA",
-                    "QTDE MENSALIDADE",
-                    "VALOR MENSALIDADE",
-                    "VALOR UNITARIO EMISSAO CARTÃO",
-                    "QTDE CARTAO EMITIDOS"
-            };
-
-            for (String column : expectedColumns) {
+            for (String expectedColumn : EXPECTED_COLUMNS) {
                 boolean columnFound = false;
-                for (int i = 0; i < header.size(); i++) {
-                    if (header.get(i).equalsIgnoreCase(column)) {
+                for (String headerColumn : header) {
+                    if (headerColumn.equalsIgnoreCase(expectedColumn)) {
                         columnFound = true;
                         break;
                     }
                 }
 
                 if (!columnFound) {
-                    return false; // Coluna ausente na estrutura de colunas
+                    throw new InvalidFileException("Coluna não encontrada: " + expectedColumn);
                 }
             }
 
             return true; // Estrutura de colunas válida
         } catch (IOException e) {
-            e.printStackTrace();
-            return false; // Erro ao ler o arquivo
+            String errorMessage = "Erro ao importar o arquivo: " + e.getMessage();
+            throw new InvalidFileException(errorMessage);
         }
     }
 }
-
-
-
-

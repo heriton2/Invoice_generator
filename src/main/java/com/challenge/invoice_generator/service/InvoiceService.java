@@ -7,6 +7,10 @@ import com.challenge.invoice_generator.entity.InvoiceItem;
 import com.challenge.invoice_generator.repository.InvoiceItemRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import static com.challenge.invoice_generator.converter.CurrencyConverter.formatCurrency;
+import static com.challenge.invoice_generator.utils.CPNJUtils.formatCNPJ;
+
 @Service
 public class InvoiceService {
     private final InvoiceItemRepository invoiceItemRepository;
@@ -44,11 +48,11 @@ public class InvoiceService {
 
     private void calculateInvoiceValue(InvoiceItem item) {
         double totalValue = item.getNumMonthlyFees() * item.getMonthlyPrice() + item.getUnitValueCard() * item.getNumCardsIssued();
-        item.setTotalValue(totalValue);
+        item.setTotalValueToPay(totalValue);
     }
 
     private void updateStatus(InvoiceItem item) {
-        if (item.getTotalValue() > DEFAULT_MAX_VALUE) {
+        if (item.getTotalValueToPay() > DEFAULT_MAX_VALUE) {
             item.setStatus("BLOQUEADO");
         }
     }
@@ -59,16 +63,15 @@ public class InvoiceService {
         dto.setCreatedDate(item.getCreatedDate());
         dto.setCreatedTime(item.getCreatedTime());
         dto.setStatus(item.getStatus());
-        dto.setCnpj(item.getCnpj());
+        dto.setCnpj(formatCNPJ(item.getCnpj()));
         dto.setFantasyName(item.getFantasyName());
         dto.setEmail(item.getEmail());
         dto.setDueDate(item.getDueDate());
-        dto.setTotalValue(item.getTotalValue());
-        dto.setTotalValueToPay(item.getTotalValueToPay());
+        dto.setTotalValueToPay(formatCurrency(item.getTotalValueToPay()));
 
         // Adicionar as linhas de fatura à lista de linhas do DTO
-        dto.addInvoiceItemRow(new InvoiceItemRowDto(item.getNumMonthlyFees(), "Mensalidade", item.getMonthlyPrice(), item.getNumMonthlyFees() * item.getMonthlyPrice()));
-        dto.addInvoiceItemRow(new InvoiceItemRowDto(item.getNumCardsIssued(), "Emissão de cartão", item.getUnitValueCard(), item.getNumCardsIssued() * item.getUnitValueCard()));
+        dto.addInvoiceItemRow(new InvoiceItemRowDto(item.getNumMonthlyFees(), "Mensalidade", formatCurrency(item.getMonthlyPrice()), formatCurrency(item.getNumMonthlyFees() * item.getMonthlyPrice())));
+        dto.addInvoiceItemRow(new InvoiceItemRowDto(item.getNumCardsIssued(), "Emissão de cartão", formatCurrency(item.getUnitValueCard()), formatCurrency(item.getNumCardsIssued() * item.getUnitValueCard())));
 
         return dto;
     }

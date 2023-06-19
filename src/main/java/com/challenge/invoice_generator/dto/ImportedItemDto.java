@@ -19,8 +19,8 @@ public class ImportedItemDto {
     private String fantasyName;
     private String email;
     private int numMonthlyFees;
-    private double monthlyPrice;
-    private double unitValueCard;
+    private String monthlyPrice;
+    private String unitValueCard;
     private int numCardsIssued;
     private String dueDate;
 }

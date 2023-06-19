@@ -4,6 +4,7 @@ import com.challenge.invoice_generator.converter.ImportedItemConverter;
 import com.challenge.invoice_generator.dto.ErrorResponseDto;
 import com.challenge.invoice_generator.dto.ImportedItemDto;
 import com.challenge.invoice_generator.exception.ImportException;
+import com.challenge.invoice_generator.exception.InvalidFileException;
 import com.challenge.invoice_generator.service.CSVImporter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -30,7 +31,10 @@ public class ImportController {
             int registerCount = csvImporter.importData(file);
             return ResponseEntity.status(HttpStatus.CREATED).body(registerCount);
         } catch (ImportException e) {
-            ErrorResponseDto errorResponse = new ErrorResponseDto(e.getErrorCode(), e.getMessage(), e.getCause().toString());
+            ErrorResponseDto errorResponse = new ErrorResponseDto(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        } catch (InvalidFileException e) {
+            ErrorResponseDto errorResponse = new ErrorResponseDto(e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }

@@ -5,6 +5,7 @@ import br.com.caelum.stella.validation.InvalidStateException;
 import com.challenge.invoice_generator.entity.ImportedItem;
 import com.challenge.invoice_generator.enums.InvoiceStatusEnum;
 import com.challenge.invoice_generator.exception.ImportException;
+import com.challenge.invoice_generator.exception.InvalidFileException;
 import com.challenge.invoice_generator.exception.InvalidParameterException;
 import com.challenge.invoice_generator.repository.ImportedItemRepository;
 import org.apache.commons.csv.CSVFormat;
@@ -22,6 +23,8 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+import static com.challenge.invoice_generator.utils.FileValidator.validateColumns;
+
 @Component
 public class CSVImporter {
     private final ImportedItemRepository importedItemRepository;
@@ -33,50 +36,51 @@ public class CSVImporter {
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     private static final String INVALID_CNPJ_ERROR_MESSAGE = "Número CNPJ inválido. Cobrança não gerada.";
 
-    public int importData(MultipartFile file) throws ImportException {
+    public int importData(MultipartFile file) throws ImportException, InvalidFileException {
 
         int registerCount = 0;
+        if(validateColumns(file)) {
+            try {
+                CSVParser parser = CSVParser.parse(file.getInputStream(), Charset.defaultCharset(), CSVFormat.DEFAULT.withDelimiter(',').withFirstRecordAsHeader());
 
-        try {
-            CSVParser parser = CSVParser.parse(file.getInputStream(), Charset.defaultCharset(), CSVFormat.DEFAULT.withDelimiter(',').withFirstRecordAsHeader());
+                for (CSVRecord column : parser) {
+                    String cnpj = column.get("CNPJ\n (apenas os números)");
+                    if (!isCnpjValid(cnpj)) {
+                        saveImportedItemWithError(cnpj);
+                        continue; // Pula para a próxima iteração
+                    }
+                    String fantasyName = column.get("NOME FANTASIA");
+                    int numDays = Integer.parseInt(column.get("NRO DE DIAS UTEIS PARA VECTO DA FATURA"));
+                    String email = column.get("EMAIL COBRANÇA");
+                    int numMonthlyFees = Integer.parseInt(column.get("QTDE MENSALIDADE"));
+                    double monthlyPrice = parseCurrencyValue(column.get("VALOR MENSALIDADE"));
+                    double unitValueCard = parseCurrencyValue(column.get("VALOR  UNITARIO EMISSAO CARTÃO"));
+                    int numCardsIssued = Integer.parseInt(column.get("QTDE CARTAO EMITIDOS"));
 
-            for (CSVRecord column : parser) {
-                String cnpj = column.get("CNPJ\n (apenas os números)");
-                if (!isCnpjValid(cnpj)) {
-                    saveImportedItemWithError(cnpj);
-                    continue; // Pula para a próxima iteração
+                    String dueDate = calculatedueDate(numDays);
+
+                    ImportedItem item = new ImportedItem();
+                    item.setCreatedDate(LocalDate.now());
+                    item.setCreatedTime(LocalTime.now());
+                    item.setStatus(InvoiceStatusEnum.PENDENTE.name());
+                    item.setCnpj(cnpj);
+                    item.setFantasyName(fantasyName);
+                    item.setEmail(email);
+                    item.setNumMonthlyFees(numMonthlyFees);
+                    item.setMonthlyPrice(monthlyPrice);
+                    item.setUnitValueCard(unitValueCard);
+                    item.setNumCardsIssued(numCardsIssued);
+                    item.setDueDate(dueDate);
+
+                    importedItemRepository.save(item);
+
+                    registerCount++;
                 }
-                String fantasyName = column.get("NOME FANTASIA");
-                int numDays = Integer.parseInt(column.get("NRO DE DIAS UTEIS PARA VECTO DA FATURA"));
-                String email = column.get("EMAIL COBRANÇA");
-                int numMonthlyFees = Integer.parseInt(column.get("QTDE MENSALIDADE"));
-                double monthlyPrice = parseCurrencyValue(column.get("VALOR MENSALIDADE"));
-                double unitValueCard = parseCurrencyValue(column.get("VALOR  UNITARIO EMISSAO CARTÃO"));
-                int numCardsIssued = Integer.parseInt(column.get("QTDE CARTAO EMITIDOS"));
-
-                String dueDate = calculatedueDate(numDays);
-
-                ImportedItem item = new ImportedItem();
-                item.setCreatedDate(LocalDate.now());
-                item.setCreatedTime(LocalTime.now());
-                item.setStatus(InvoiceStatusEnum.PENDENTE.name());
-                item.setCnpj(cnpj);
-                item.setFantasyName(fantasyName);
-                item.setEmail(email);
-                item.setNumMonthlyFees(numMonthlyFees);
-                item.setMonthlyPrice(monthlyPrice);
-                item.setUnitValueCard(unitValueCard);
-                item.setNumCardsIssued(numCardsIssued);
-                item.setDueDate(dueDate);
-
-                importedItemRepository.save(item);
-
-                registerCount ++;
+            } catch (IOException | InvalidParameterException e) {
+                String errorMessage = "Erro ao importar o arquivo: " + e.getMessage();
+                String errorCode = "import_error";
+                throw new ImportException(errorMessage, errorCode, e);
             }
-        } catch (IOException | InvalidParameterException e) {
-            String errorMessage = "Erro ao importar o arquivo: " + e.getMessage();
-            String errorCode = "import_error";
-            throw new ImportException(errorMessage, errorCode, e);
         }
 
         return registerCount;

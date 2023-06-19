@@ -21,8 +21,7 @@ public class InvoiceItemDto {
     private String fantasyName;
     private String email;
     private String dueDate;
-    private Double totalValue;
-    private Double totalValueToPay;
+    private String totalValueToPay;
     private List<InvoiceItemRowDto> rows = new ArrayList<>();
 
     // Método para adicionar um novo item de fatura na lista

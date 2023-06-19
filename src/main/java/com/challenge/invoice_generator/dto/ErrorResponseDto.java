@@ -8,13 +8,9 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class ErrorResponseDto {
-    private String errorCode;
     private String errorMessage;
-    private String errorCause;
 
-    public ErrorResponseDto(String errorCode, String errorMessage, String errorCause) {
-        this.errorCode = errorCode;
+    public ErrorResponseDto(String errorMessage) {
         this.errorMessage = errorMessage;
-        this.errorCause = errorCause;
     }
 }
