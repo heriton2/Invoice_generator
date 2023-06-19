@@ -1,9 +1,14 @@
 package com.challenge.invoice_generator.controller;
 
-import com.challenge.invoice_generator.dto.InvoiceItem;
+import com.challenge.invoice_generator.converter.ImportedItemConverter;
+import com.challenge.invoice_generator.dto.ErrorResponseDto;
+import com.challenge.invoice_generator.dto.ImportedItemDto;
+import com.challenge.invoice_generator.exception.ImportException;
 import com.challenge.invoice_generator.service.CSVImporter;
-import com.challenge.invoice_generator.service.CalculateInvoice;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,13 +21,27 @@ public class ImportController {
     private final CSVImporter csvImporter;
 
     @Autowired
-    public ImportController(CSVImporter csvImporter, CalculateInvoice calculateInvoice) {
+    public ImportController(CSVImporter csvImporter) {
         this.csvImporter = csvImporter;
     }
+    @PostMapping(value ="/import", produces = "application/json")
+    public ResponseEntity<Object> importData(@RequestParam("file") MultipartFile file) {
+        try {
+            csvImporter.importData(file);
+            return ResponseEntity.status(HttpStatus.CREATED).body("Importação concluída com sucesso.");
+        } catch (ImportException e) {
+            ErrorResponseDto errorResponse = new ErrorResponseDto(e.getErrorCode(), e.getMessage(), e.getCause().toString());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
 
-    @PostMapping("/import")
-    public List<InvoiceItem> importData(@RequestParam("file") MultipartFile file) {
-        return csvImporter.importData(file);
+    @GetMapping(value ="/import", produces = "application/json")
+    public ResponseEntity<List<ImportedItemDto>> getAllImportedItems() {
+        List<ImportedItemDto> importedItems = csvImporter.getAllImportedItems()
+                .stream()
+                .map(ImportedItemConverter::toDto).toList();
+
+        return ResponseEntity.ok(importedItems);
     }
 }
 

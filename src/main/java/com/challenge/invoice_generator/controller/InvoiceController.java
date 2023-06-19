@@ -1,27 +1,34 @@
 package com.challenge.invoice_generator.controller;
 
-import com.challenge.invoice_generator.service.InvoiceCalculator;
+import com.challenge.invoice_generator.dto.InvoiceItemDto;
+import com.challenge.invoice_generator.entity.ImportedItem;
+import com.challenge.invoice_generator.repository.ImportedItemRepository;
+import com.challenge.invoice_generator.service.InvoiceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
-@RestController
-@RequestMapping("/api/invoice")
+@Controller
 public class InvoiceController {
-    private InvoiceCalculator invoiceCalculator;
+    private final ImportedItemRepository importedItemRepository;
+    private final InvoiceService invoiceService;
 
     @Autowired
-    public InvoiceController(InvoiceCalculator invoiceCalculator) {
-        this.invoiceCalculator = invoiceCalculator;
+    public InvoiceController(ImportedItemRepository importedItemRepository, InvoiceService invoiceService) {
+        this.importedItemRepository = importedItemRepository;
+        this.invoiceService = invoiceService;
     }
 
-    @PostMapping("/generate")
-    public ResponseEntity<String> generateInvoice() {
-        invoiceCalculator.calculateInvoice();
+    @GetMapping("/generate-invoice/{id}")
+    public ResponseEntity<InvoiceItemDto> generateInvoice(@PathVariable Long id) {
+        ImportedItem importedItem = importedItemRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid ID"));
 
-        return ResponseEntity.ok("Fatura gerada com sucesso.");
+        InvoiceItemDto invoiceItemDto = invoiceService.generateInvoice(importedItem);
+        return ResponseEntity.ok(invoiceItemDto);
     }
 }
+
 
