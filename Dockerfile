@@ -1,5 +1,5 @@
 # Imagem base do OpenJDK 17
-FROM adoptopenjdk:17-jdk-hotspot
+FROM openjdk:17-jdk
 
 # Diretório de trabalho no container
 WORKDIR /app
