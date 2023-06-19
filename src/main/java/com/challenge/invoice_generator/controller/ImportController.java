@@ -28,7 +28,7 @@ public class ImportController {
     public ResponseEntity<Object> importData(@RequestParam("file") MultipartFile file) {
         try {
             csvImporter.importData(file);
-            return ResponseEntity.status(HttpStatus.CREATED).body("Importação concluída com sucesso.");
+            return ResponseEntity.status(HttpStatus.CREATED).body(null);
         } catch (ImportException e) {
             ErrorResponseDto errorResponse = new ErrorResponseDto(e.getErrorCode(), e.getMessage(), e.getCause().toString());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
