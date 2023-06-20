@@ -44,18 +44,18 @@ public class CSVImporter {
                 CSVParser parser = CSVParser.parse(file.getInputStream(), Charset.defaultCharset(), CSVFormat.DEFAULT.withDelimiter(',').withFirstRecordAsHeader());
 
                 for (CSVRecord column : parser) {
-                    String cnpj = column.get("CNPJ\n (apenas os números)");
+                    String cnpj = column.get(0);
                     if (!isCnpjValid(cnpj)) {
-                        saveImportedItemWithError(cnpj);
+                        saveImportedItemWithError();
                         continue; // Pula para a próxima iteração
                     }
-                    String fantasyName = column.get("NOME FANTASIA");
-                    int numDays = Integer.parseInt(column.get("NRO DE DIAS UTEIS PARA VECTO DA FATURA"));
-                    String email = column.get("EMAIL COBRANÇA");
-                    int numMonthlyFees = Integer.parseInt(column.get("QTDE MENSALIDADE"));
-                    double monthlyPrice = parseCurrencyValue(column.get("VALOR MENSALIDADE"));
-                    double unitValueCard = parseCurrencyValue(column.get("VALOR  UNITARIO EMISSAO CARTÃO"));
-                    int numCardsIssued = Integer.parseInt(column.get("QTDE CARTAO EMITIDOS"));
+                    String fantasyName = column.get(1);
+                    int numDays = Integer.parseInt(column.get(2));
+                    String email = column.get(3);
+                    int numMonthlyFees = Integer.parseInt(column.get(4));
+                    double monthlyPrice = parseCurrencyValue(column.get(5));
+                    double unitValueCard = parseCurrencyValue(column.get(6));
+                    int numCardsIssued = Integer.parseInt(column.get(7));
 
                     String dueDate = calculatedueDate(numDays);
 
@@ -99,12 +99,11 @@ public class CSVImporter {
         }
     }
 
-    private void saveImportedItemWithError(String cnpj) throws InvalidParameterException {
+    private void saveImportedItemWithError() throws InvalidParameterException {
         ImportedItem item = new ImportedItem();
         item.setCreatedDate(LocalDate.now());
         item.setCreatedTime(LocalTime.now());
         item.setStatus(InvoiceStatusEnum.ERRO.name());
-        item.setCnpj(cnpj);
 
         importedItemRepository.save(item);
 

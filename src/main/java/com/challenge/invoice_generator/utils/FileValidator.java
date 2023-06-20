@@ -8,14 +8,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Set;
+import java.util.List;
 
 public class FileValidator {
 
-    private static final Set<String> EXPECTED_COLUMNS = new HashSet<>(Arrays.asList(
+    private static final List<String> EXPECTED_COLUMNS = List.of(
             "CNPJ\n (apenas os números)",
             "NOME FANTASIA",
             "NRO DE DIAS UTEIS PARA VECTO DA FATURA",
@@ -24,38 +22,32 @@ public class FileValidator {
             "VALOR MENSALIDADE",
             "VALOR  UNITARIO EMISSAO CARTÃO",
             "QTDE CARTAO EMITIDOS"
-    ));
+    );
 
     public static boolean validateColumns(MultipartFile file) throws InvalidFileException {
         try (CSVParser parser = CSVParser.parse(file.getInputStream(), StandardCharsets.UTF_8, CSVFormat.DEFAULT)) {
             Iterator<CSVRecord> recordsIterator = parser.iterator();
             if (!recordsIterator.hasNext()) {
-                return false; // Arquivo vazio
+                throw new InvalidFileException("Arquivo vazio.");
             }
 
             CSVRecord header = recordsIterator.next();
-            if (header == null) {
-                return false; // Estrutura de colunas divergente
+            if (header.size() != EXPECTED_COLUMNS.size()) {
+                throw new InvalidFileException("Número de colunas divergente.");
             }
 
-            for (String expectedColumn : EXPECTED_COLUMNS) {
-                boolean columnFound = false;
-                for (String headerColumn : header) {
-                    if (headerColumn.equalsIgnoreCase(expectedColumn)) {
-                        columnFound = true;
-                        break;
-                    }
-                }
-
-                if (!columnFound) {
+            for (int i = 0; i < EXPECTED_COLUMNS.size(); i++) {
+                String expectedColumn = EXPECTED_COLUMNS.get(i);
+                String actualColumn = header.get(i).replaceAll("\\s", "");
+                if (!actualColumn.equalsIgnoreCase(expectedColumn.replaceAll("\\s", ""))) {
                     throw new InvalidFileException("Coluna não encontrada: " + expectedColumn);
                 }
             }
 
             return true; // Estrutura de colunas válida
         } catch (IOException e) {
-            String errorMessage = "Erro ao importar o arquivo: " + e.getMessage();
-            throw new InvalidFileException(errorMessage);
+            throw new InvalidFileException("Erro ao importar o arquivo: " + e.getMessage());
         }
     }
 }
+
