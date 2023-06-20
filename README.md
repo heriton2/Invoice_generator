@@ -73,7 +73,7 @@ Agora você está pronto para executar o projeto Spring com Maven em sua máquin
 
 ### Modelo do arquivo CSV
 
-O arquivo CSV deve seguir o seguinte modelo: "DESAFIO FATURA COBRANCA MENSALIDADE E SERVICOS TRADE MODELO \<mes/ano\>".
+O arquivo CSV deve seguir o seguinte modelo: [Modelo_CSV](https://docs.google.com/spreadsheets/d/1kwpgti04D1DJwyvXV0iS6wvgyDJXXLiZ2mYhrozv2HM/edit?usp=sharing).
 
 ## Fluxo de funcionamento
 
