@@ -8,6 +8,8 @@ import com.challenge.invoice_generator.exception.InvalidFileException;
 import com.challenge.invoice_generator.interfaces.controller.IImportController;
 import com.challenge.invoice_generator.interfaces.service.ICSVImporter;
 import com.challenge.invoice_generator.service.CSVImporter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +24,7 @@ import java.util.List;
 @RestController
 public class ImportController implements IImportController {
     private final ICSVImporter csvImporter;
+    private final Logger logger = LoggerFactory.getLogger(ImportController.class);
 
     @Autowired
     public ImportController(CSVImporter csvImporter) {
@@ -33,6 +36,7 @@ public class ImportController implements IImportController {
             int registerCount = csvImporter.importData(file);
             return ResponseEntity.status(HttpStatus.CREATED).body(registerCount);
         } catch (ImportException | InvalidFileException e) {
+            logger.error("Erro ao importar dados: " + e.getMessage());
             ErrorResponseDto errorResponse = new ErrorResponseDto(e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
@@ -40,11 +44,16 @@ public class ImportController implements IImportController {
 
     @GetMapping(value ="/import", produces = "application/json")
     public ResponseEntity<List<ImportedItemDto>> getAllImportedItems() {
-        List<ImportedItemDto> importedItems = csvImporter.getAllImportedItems()
-                .stream()
-                .map(ImportedItemConverter::toDto).toList();
-
-        return ResponseEntity.ok(importedItems);
+        try {
+            List<ImportedItemDto> importedItems = csvImporter.getAllImportedItems()
+                    .stream()
+                    .map(ImportedItemConverter::toDto)
+                    .toList();
+            return ResponseEntity.ok(importedItems);
+        } catch (Exception e) {
+            logger.error("Erro ao obter todos os itens importados: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 }
 

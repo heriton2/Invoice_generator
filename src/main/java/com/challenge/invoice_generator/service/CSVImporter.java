@@ -12,6 +12,8 @@ import com.challenge.invoice_generator.interfaces.repository.ImportedItemReposit
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -29,6 +31,8 @@ import static com.challenge.invoice_generator.utils.FileValidator.validateColumn
 @Component
 public class CSVImporter implements ICSVImporter {
     private final ImportedItemRepository importedItemRepository;
+    private final Logger logger = LoggerFactory.getLogger(CSVImporter.class);
+
     @Autowired
     public CSVImporter(ImportedItemRepository importedItemRepository) {
         this.importedItemRepository = importedItemRepository;
@@ -79,6 +83,7 @@ public class CSVImporter implements ICSVImporter {
                 }
             } catch (IOException | InvalidParameterException e) {
                 String errorMessage = "Erro ao importar o arquivo: " + e.getMessage();
+                logger.error(errorMessage);
                 throw new ImportException(errorMessage);
             }
         }
@@ -96,6 +101,7 @@ public class CSVImporter implements ICSVImporter {
             validator.assertValid(cnpj);
             return true;
         } catch (InvalidStateException e) {
+            logger.error("CNPJ inválido: " + cnpj);
             return false;
         }
     }
@@ -108,6 +114,7 @@ public class CSVImporter implements ICSVImporter {
 
         importedItemRepository.save(item);
 
+        logger.error(INVALID_CNPJ_ERROR_MESSAGE);
         throw new InvalidParameterException(CSVImporter.INVALID_CNPJ_ERROR_MESSAGE);
     }
 

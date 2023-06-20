@@ -7,6 +7,8 @@ import com.challenge.invoice_generator.entity.InvoiceItem;
 import com.challenge.invoice_generator.interfaces.service.IInvoiceService;
 import com.challenge.invoice_generator.interfaces.repository.ImportedItemRepository;
 import com.challenge.invoice_generator.interfaces.repository.InvoiceItemRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,7 +19,7 @@ import static com.challenge.invoice_generator.utils.CPNJUtils.formatCNPJ;
 public class InvoiceService implements IInvoiceService {
     private final InvoiceItemRepository invoiceItemRepository;
     private final ImportedItemRepository importedItemRepository;
-
+    private final Logger logger = LoggerFactory.getLogger(InvoiceService.class);
     private static final double DEFAULT_MAX_VALUE = 25000.0;
 
     @Autowired
@@ -30,10 +32,14 @@ public class InvoiceService implements IInvoiceService {
         InvoiceItem invoiceItem = createInvoiceItem(importedItem);
         calculateInvoiceValue(invoiceItem);
         updateStatus(invoiceItem);
-        invoiceItemRepository.save(invoiceItem);
+        try {
+            invoiceItemRepository.save(invoiceItem);
 
-        importedItem.setStatus(invoiceItem.getStatus());
-        importedItemRepository.save(importedItem);
+            importedItem.setStatus(invoiceItem.getStatus());
+            importedItemRepository.save(importedItem);
+        } catch (Exception e) {
+            logger.error("Erro ao gerar fatura: " + e.getMessage());
+        }
 
         return convertToDto(invoiceItem);
     }
