@@ -7,7 +7,8 @@ import com.challenge.invoice_generator.enums.InvoiceStatusEnum;
 import com.challenge.invoice_generator.exception.ImportException;
 import com.challenge.invoice_generator.exception.InvalidFileException;
 import com.challenge.invoice_generator.exception.InvalidParameterException;
-import com.challenge.invoice_generator.repository.ImportedItemRepository;
+import com.challenge.invoice_generator.interfaces.service.ICSVImporter;
+import com.challenge.invoice_generator.interfaces.repository.ImportedItemRepository;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -26,7 +27,7 @@ import java.util.List;
 import static com.challenge.invoice_generator.utils.FileValidator.validateColumns;
 
 @Component
-public class CSVImporter {
+public class CSVImporter implements ICSVImporter {
     private final ImportedItemRepository importedItemRepository;
     @Autowired
     public CSVImporter(ImportedItemRepository importedItemRepository) {

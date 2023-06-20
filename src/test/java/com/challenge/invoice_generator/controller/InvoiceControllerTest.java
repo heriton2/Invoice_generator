@@ -2,7 +2,7 @@ package com.challenge.invoice_generator.controller;
 
 import com.challenge.invoice_generator.dto.InvoiceItemDto;
 import com.challenge.invoice_generator.entity.ImportedItem;
-import com.challenge.invoice_generator.repository.ImportedItemRepository;
+import com.challenge.invoice_generator.interfaces.repository.ImportedItemRepository;
 import com.challenge.invoice_generator.service.InvoiceService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

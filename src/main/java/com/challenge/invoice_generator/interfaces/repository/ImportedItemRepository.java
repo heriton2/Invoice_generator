@@ -1,4 +1,4 @@
-package com.challenge.invoice_generator.repository;
+package com.challenge.invoice_generator.interfaces.repository;
 
 import com.challenge.invoice_generator.entity.ImportedItem;
 import org.springframework.data.jpa.repository.JpaRepository;

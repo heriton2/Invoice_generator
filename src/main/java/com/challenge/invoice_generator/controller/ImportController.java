@@ -5,6 +5,8 @@ import com.challenge.invoice_generator.dto.ErrorResponseDto;
 import com.challenge.invoice_generator.dto.ImportedItemDto;
 import com.challenge.invoice_generator.exception.ImportException;
 import com.challenge.invoice_generator.exception.InvalidFileException;
+import com.challenge.invoice_generator.interfaces.controller.IImportController;
+import com.challenge.invoice_generator.interfaces.service.ICSVImporter;
 import com.challenge.invoice_generator.service.CSVImporter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,8 +20,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 @RestController
-public class ImportController {
-    private final CSVImporter csvImporter;
+public class ImportController implements IImportController {
+    private final ICSVImporter csvImporter;
 
     @Autowired
     public ImportController(CSVImporter csvImporter) {

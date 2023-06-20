@@ -4,8 +4,9 @@ import com.challenge.invoice_generator.dto.InvoiceItemDto;
 import com.challenge.invoice_generator.dto.InvoiceItemRowDto;
 import com.challenge.invoice_generator.entity.ImportedItem;
 import com.challenge.invoice_generator.entity.InvoiceItem;
-import com.challenge.invoice_generator.repository.ImportedItemRepository;
-import com.challenge.invoice_generator.repository.InvoiceItemRepository;
+import com.challenge.invoice_generator.interfaces.service.IInvoiceService;
+import com.challenge.invoice_generator.interfaces.repository.ImportedItemRepository;
+import com.challenge.invoice_generator.interfaces.repository.InvoiceItemRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,7 +14,7 @@ import static com.challenge.invoice_generator.converter.CurrencyConverter.format
 import static com.challenge.invoice_generator.utils.CPNJUtils.formatCNPJ;
 
 @Service
-public class InvoiceService {
+public class InvoiceService implements IInvoiceService {
     private final InvoiceItemRepository invoiceItemRepository;
     private final ImportedItemRepository importedItemRepository;
 
