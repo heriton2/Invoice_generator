@@ -4,6 +4,7 @@ import com.challenge.invoice_generator.dto.InvoiceItemDto;
 import com.challenge.invoice_generator.dto.InvoiceItemRowDto;
 import com.challenge.invoice_generator.entity.ImportedItem;
 import com.challenge.invoice_generator.entity.InvoiceItem;
+import com.challenge.invoice_generator.repository.ImportedItemRepository;
 import com.challenge.invoice_generator.repository.InvoiceItemRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,11 +15,14 @@ import static com.challenge.invoice_generator.utils.CPNJUtils.formatCNPJ;
 @Service
 public class InvoiceService {
     private final InvoiceItemRepository invoiceItemRepository;
-    private final double DEFAULT_MAX_VALUE = 25000.0;
+    private final ImportedItemRepository importedItemRepository;
+
+    private static final double DEFAULT_MAX_VALUE = 25000.0;
 
     @Autowired
-    public InvoiceService(InvoiceItemRepository invoiceItemRepository) {
+    public InvoiceService(InvoiceItemRepository invoiceItemRepository, ImportedItemRepository importedItemRepository) {
         this.invoiceItemRepository = invoiceItemRepository;
+        this.importedItemRepository = importedItemRepository;
     }
 
     public InvoiceItemDto generateInvoice(ImportedItem importedItem) {
@@ -26,6 +30,9 @@ public class InvoiceService {
         calculateInvoiceValue(invoiceItem);
         updateStatus(invoiceItem);
         invoiceItemRepository.save(invoiceItem);
+
+        importedItem.setStatus(invoiceItem.getStatus());
+        importedItemRepository.save(importedItem);
 
         return convertToDto(invoiceItem);
     }

@@ -3,6 +3,7 @@ package com.challenge.invoice_generator.service;
 import com.challenge.invoice_generator.dto.InvoiceItemDto;
 import com.challenge.invoice_generator.entity.ImportedItem;
 import com.challenge.invoice_generator.entity.InvoiceItem;
+import com.challenge.invoice_generator.repository.ImportedItemRepository;
 import com.challenge.invoice_generator.repository.InvoiceItemRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,10 +24,12 @@ class InvoiceServiceTest {
     @Mock
     private InvoiceItemRepository invoiceItemRepository;
 
+    @Mock
+    private ImportedItemRepository importedItemRepository;
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        invoiceService = new InvoiceService(invoiceItemRepository);
+        invoiceService = new InvoiceService(invoiceItemRepository, importedItemRepository);
     }
 
     @Test

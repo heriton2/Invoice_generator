@@ -30,10 +30,7 @@ public class ImportController {
         try {
             int registerCount = csvImporter.importData(file);
             return ResponseEntity.status(HttpStatus.CREATED).body(registerCount);
-        } catch (ImportException e) {
-            ErrorResponseDto errorResponse = new ErrorResponseDto(e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-        } catch (InvalidFileException e) {
+        } catch (ImportException | InvalidFileException e) {
             ErrorResponseDto errorResponse = new ErrorResponseDto(e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
