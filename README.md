@@ -64,6 +64,10 @@ Certifique-se de que as configurações do H2 no projeto estejam corretas para a
 ```
 http://localhost:8080/swagger-ui/index.html
 ```
+ou
+```
+https://invoicegenerator-heriton2.b4a.run/swagger-ui/index.html
+```
 
 Isso abrirá a interface do Swagger, onde você pode explorar e testar os endpoints da API.
 
