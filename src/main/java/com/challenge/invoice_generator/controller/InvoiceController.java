@@ -2,6 +2,7 @@ package com.challenge.invoice_generator.controller;
 
 import com.challenge.invoice_generator.dto.InvoiceItemDto;
 import com.challenge.invoice_generator.entity.ImportedItem;
+import com.challenge.invoice_generator.exception.InvalidParameterException;
 import com.challenge.invoice_generator.interfaces.controller.IInvoiceController;
 import com.challenge.invoice_generator.interfaces.repository.ImportedItemRepository;
 import com.challenge.invoice_generator.interfaces.service.IInvoiceService;
@@ -32,6 +33,11 @@ public class InvoiceController implements IInvoiceController {
         InvoiceItemDto invoiceItemDto = invoiceService.generateInvoice(importedItem);
         return ResponseEntity.ok(invoiceItemDto);
 
+    }
+    @GetMapping("/invoice/{id}")
+    public ResponseEntity<InvoiceItemDto> getInvoice(@PathVariable Long id) throws InvalidParameterException {
+        InvoiceItemDto invoiceItemDto = invoiceService.getGeneratedInvoice(id);
+        return ResponseEntity.ok(invoiceItemDto);
     }
 }
 

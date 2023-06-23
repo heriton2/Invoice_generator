@@ -4,6 +4,7 @@ import com.challenge.invoice_generator.dto.InvoiceItemDto;
 import com.challenge.invoice_generator.dto.InvoiceItemRowDto;
 import com.challenge.invoice_generator.entity.ImportedItem;
 import com.challenge.invoice_generator.entity.InvoiceItem;
+import com.challenge.invoice_generator.exception.InvalidParameterException;
 import com.challenge.invoice_generator.interfaces.service.IInvoiceService;
 import com.challenge.invoice_generator.interfaces.repository.ImportedItemRepository;
 import com.challenge.invoice_generator.interfaces.repository.InvoiceItemRepository;
@@ -42,6 +43,16 @@ public class InvoiceService implements IInvoiceService {
         }
 
         return convertToDto(invoiceItem);
+    }
+
+    public InvoiceItemDto getGeneratedInvoice(Long id) throws InvalidParameterException {
+        try {
+            InvoiceItem invoiceItem = invoiceItemRepository.getReferenceById(id);
+            return convertToDto(invoiceItem);
+        } catch (Exception e) {
+            logger.error("Id não encontrado");
+            throw new InvalidParameterException("Id inválido");
+        }
     }
 
     private InvoiceItem createInvoiceItem(ImportedItem importedItem) {
